@@ -5,9 +5,12 @@
 
     <script src="wasm_exec.js"></script>
     <script>
-        const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
-                .then((result) => go.run(result.instance));
+        (async () => {
+            const go = new Go();
+            const source = await (await fetch("main.wasm")).arrayBuffer();
+            const instantiated = await WebAssembly.instantiate(source, go.importObject);
+            go.run(instantiated.instance);
+        })();
     </script>
 
     <style>
