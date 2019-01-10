@@ -41,8 +41,9 @@ func main() {
 	// Init Canvas stuff
 	doc := js.Global().Get("document")
 	canvas := doc.Call("getElementById", "main_canvas")
-	width = doc.Get("body").Get("clientWidth").Int()
-	height = doc.Get("body").Get("clientHeight").Int()
+	devicePixelRatio := js.Global().Get("devicePixelRatio").Float()
+	width = int(devicePixelRatio * doc.Get("body").Get("clientWidth").Float())
+	height = int(devicePixelRatio * doc.Get("body").Get("clientHeight").Float())
 	canvas.Set("width", width)
 	canvas.Set("height", height)
 
