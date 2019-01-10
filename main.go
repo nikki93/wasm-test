@@ -5,54 +5,19 @@ import (
 	"wasm-test/webgl"
 )
 
-var (
-	width   int
-	height  int
-	gl      *webgl.Context
-	glTypes GLTypes
-)
-
-type GLTypes struct {
-	staticDraw         js.Value
-	arrayBuffer        js.Value
-	elementArrayBuffer js.Value
-	vertexShader       js.Value
-	fragmentShader     js.Value
-	float              js.Value
-	depthTest          js.Value
-	colorBufferBit     js.Value
-	triangles          js.Value
-	unsignedShort      js.Value
-}
-
-func (types *GLTypes) New() {
-	types.staticDraw = gl.Get("STATIC_DRAW")
-	types.arrayBuffer = gl.Get("ARRAY_BUFFER")
-	types.elementArrayBuffer = gl.Get("ELEMENT_ARRAY_BUFFER")
-	types.vertexShader = gl.Get("VERTEX_SHADER")
-	types.fragmentShader = gl.Get("FRAGMENT_SHADER")
-	types.float = gl.Get("FLOAT")
-	types.depthTest = gl.Get("DEPTH_TEST")
-	types.colorBufferBit = gl.Get("COLOR_BUFFER_BIT")
-	types.triangles = gl.Get("TRIANGLES")
-	types.unsignedShort = gl.Get("UNSIGNED_SHORT")
-}
-
 func main() {
 	// Init Canvas stuff
 	doc := js.Global().Get("document")
 	canvas := doc.Call("getElementById", "main_canvas")
 	devicePixelRatio := js.Global().Get("devicePixelRatio").Float()
-	width = int(devicePixelRatio * doc.Get("body").Get("clientWidth").Float())
-	height = int(devicePixelRatio * doc.Get("body").Get("clientHeight").Float())
+	width := int(devicePixelRatio * doc.Get("body").Get("clientWidth").Float())
+	height := int(devicePixelRatio * doc.Get("body").Get("clientHeight").Float())
 	canvas.Set("width", width)
 	canvas.Set("height", height)
 
 	attrs := webgl.DefaultAttributes()
 	attrs.Alpha = false
-	gl, _ = webgl.NewContext(canvas, attrs)
-
-	glTypes.New()
+	gl, _ := webgl.NewContext(canvas, attrs)
 
 	//// VERTEX BUFFER ////
 	var verticesNative = []float32{
@@ -62,15 +27,15 @@ func main() {
 	}
 	var vertices = js.TypedArrayOf(verticesNative)
 	// Create buffer
-	vertexBuffer := gl.Call("createBuffer", glTypes.arrayBuffer)
+	vertexBuffer := gl.CreateBuffer()
 	// Bind to buffer
-	gl.Call("bindBuffer", glTypes.arrayBuffer, vertexBuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 
 	// Pass data to buffer
-	gl.Call("bufferData", glTypes.arrayBuffer, vertices, glTypes.staticDraw)
+	gl.BufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
 
 	// Unbind buffer
-	gl.Call("bindBuffer", glTypes.arrayBuffer, nil)
+	gl.BindBuffer(gl.ARRAY_BUFFER, js.Null())
 
 	//// INDEX BUFFER ////
 	var indicesNative = []uint32{
@@ -79,16 +44,16 @@ func main() {
 	var indices = js.TypedArrayOf(indicesNative)
 
 	// Create buffer
-	indexBuffer := gl.Call("createBuffer", glTypes.elementArrayBuffer)
+	indexBuffer := gl.CreateBuffer()
 
 	// Bind to buffer
-	gl.Call("bindBuffer", glTypes.elementArrayBuffer, indexBuffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
 
 	// Pass data to buffer
-	gl.Call("bufferData", glTypes.elementArrayBuffer, indices, glTypes.staticDraw)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
 	// Unbind buffer
-	gl.Call("bindBuffer", glTypes.elementArrayBuffer, nil)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, js.Null())
 
 	//// Shaders ////
 
@@ -101,13 +66,13 @@ func main() {
 	}`
 
 	// Create a vertex shader object
-	vertShader := gl.Call("createShader", glTypes.vertexShader)
+	vertShader := gl.CreateShader(gl.VERTEX_SHADER)
 
 	// Attach vertex shader source code
-	gl.Call("shaderSource", vertShader, vertCode)
+	gl.ShaderSource(vertShader, vertCode)
 
 	// Compile the vertex shader
-	gl.Call("compileShader", vertShader)
+	gl.CompileShader(vertShader)
 
 	//fragment shader source code
 	fragCode := `
@@ -116,59 +81,59 @@ func main() {
 	}`
 
 	// Create fragment shader object
-	fragShader := gl.Call("createShader", glTypes.fragmentShader)
+	fragShader := gl.CreateShader(gl.FRAGMENT_SHADER)
 
 	// Attach fragment shader source code
-	gl.Call("shaderSource", fragShader, fragCode)
+	gl.ShaderSource(fragShader, fragCode)
 
 	// Compile the fragmentt shader
-	gl.Call("compileShader", fragShader)
+	gl.CompileShader(fragShader)
 
 	// Create a shader program object to store
 	// the combined shader program
 	shaderProgram := gl.Call("createProgram")
 
 	// Attach a vertex shader
-	gl.Call("attachShader", shaderProgram, vertShader)
+	gl.AttachShader(shaderProgram, vertShader)
 
 	// Attach a fragment shader
-	gl.Call("attachShader", shaderProgram, fragShader)
+	gl.AttachShader(shaderProgram, fragShader)
 
 	// Link both the programs
-	gl.Call("linkProgram", shaderProgram)
+	gl.LinkProgram(shaderProgram)
 
 	// Use the combined shader program object
-	gl.Call("useProgram", shaderProgram)
+	gl.UseProgram(shaderProgram)
 
 	//// Associating shaders to buffer objects ////
 
 	// Bind vertex buffer object
-	gl.Call("bindBuffer", glTypes.arrayBuffer, vertexBuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 
 	// Bind index buffer object
-	gl.Call("bindBuffer", glTypes.elementArrayBuffer, indexBuffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
 
 	// Get the attribute location
-	coord := gl.Call("getAttribLocation", shaderProgram, "coordinates")
+	coord := gl.GetAttribLocation(shaderProgram, "coordinates")
 
 	// Point an attribute to the currently bound VBO
-	gl.Call("vertexAttribPointer", coord, 3, glTypes.float, false, 0, 0)
+	gl.VertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0)
 
 	// Enable the attribute
-	gl.Call("enableVertexAttribArray", coord)
+	gl.EnableVertexAttribArray(coord)
 
 	//// Drawing the triangle ////
 
 	// Clear the canvas
-	gl.Call("clearColor", 0.5, 0.5, 0.5, 0.9)
-	gl.Call("clear", glTypes.colorBufferBit)
+	gl.ClearColor(0.5, 0.5, 0.5, 0.9)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
 
 	// Enable the depth test
-	gl.Call("enable", glTypes.depthTest)
+	gl.Enable(gl.DEPTH_TEST)
 
 	// Set the view port
-	gl.Call("viewport", 0, 0, width, height)
+	gl.Viewport(0, 0, width, height)
 
 	// Draw the triangle
-	gl.Call("drawElements", glTypes.triangles, len(indicesNative), glTypes.unsignedShort, 0)
+	gl.DrawElements(gl.TRIANGLES, len(indicesNative), gl.UNSIGNED_SHORT, 0)
 }
