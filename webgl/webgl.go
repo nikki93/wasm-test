@@ -359,9 +359,9 @@ func NewContext(canvas js.Value, ca *ContextAttributes) (*Context, error) {
 		"preserveDrawingBuffer": ca.PreserveDrawingBuffer,
 	}
 	gl := canvas.Call("getContext", "webgl", attrs)
-	if gl == js.Null() {
+	if gl == js.Null() || gl == js.Undefined() {
 		gl = canvas.Call("getContext", "experimental-webgl", attrs)
-		if gl == js.Null() {
+		if gl == js.Null() || gl == js.Undefined() {
 			return nil, errors.New("Creating a webgl context has failed.")
 		}
 	}
