@@ -1,6 +1,8 @@
-// Copyright 2014 Joseph Hager. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// From https://github.com/gopherjs/webgl/blob/39bd6d41eeb587730fcaa65adf71978fb10675bc/webgl.go,
+// modified for compatibility with 'syscall/js'. Original copyright notice:
+//   Copyright 2014 Joseph Hager. All rights reserved.
+//   Use of this source code is governed by a BSD-style
+//   license that can be found in the LICENSE file.
 
 package webgl
 
