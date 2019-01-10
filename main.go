@@ -2,12 +2,13 @@ package main
 
 import (
 	"syscall/js"
+	"wasm-test/webgl"
 )
 
 var (
 	width   int
 	height  int
-	gl      js.Value
+	gl      *webgl.Context
 	glTypes GLTypes
 )
 
@@ -47,15 +48,9 @@ func main() {
 	canvas.Set("width", width)
 	canvas.Set("height", height)
 
-	gl = canvas.Call("getContext", "webgl")
-	if gl == js.Undefined() {
-		gl = canvas.Call("getContext", "experimental-webgl")
-	}
-	// once again
-	if gl == js.Undefined() {
-		js.Global().Call("alert", "browser might not support webgl")
-		return
-	}
+	attrs := webgl.DefaultAttributes()
+	attrs.Alpha = false
+	gl, _ = webgl.NewContext(canvas, attrs)
 
 	glTypes.New()
 

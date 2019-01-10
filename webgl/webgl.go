@@ -350,14 +350,14 @@ func NewContext(canvas js.Value, ca *ContextAttributes) (*Context, error) {
 		ca = DefaultAttributes()
 	}
 
-	attrs := map[string]bool{
+	attrs := js.ValueOf(map[string]interface{}{
 		"alpha":                 ca.Alpha,
 		"depth":                 ca.Depth,
 		"stencil":               ca.Stencil,
 		"antialias":             ca.Antialias,
 		"premultipliedAlpha":    ca.PremultipliedAlpha,
 		"preserveDrawingBuffer": ca.PreserveDrawingBuffer,
-	}
+	})
 	gl := canvas.Call("getContext", "webgl", attrs)
 	if gl == js.Null() || gl == js.Undefined() {
 		gl = canvas.Call("getContext", "experimental-webgl", attrs)
